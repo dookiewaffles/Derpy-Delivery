@@ -46,7 +46,12 @@ class givemail(base):
 #handles object
 class derpy(base):
 	
-	def __init__(self, position, mailBag = True):
+	def __init__(self, position, args):
+		if args['mailbag'] != None:
+			mailBag = args['mailbag']
+		else:
+			mailBag = True
+		
 		#base init
 		sprite = "derpy_fly_bag_r"
 		if not mailBag:

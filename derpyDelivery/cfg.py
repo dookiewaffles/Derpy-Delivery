@@ -21,14 +21,28 @@ import os
 
 root_path = os.path.abspath(os.path.dirname(os.path.relpath(__file__)))
 
+res_path = {
+	'img':'img',
+	'snd':'snd',
+	'font':'font',
+	'lvl':'levels'
+}
+
+#Convert short paths to full paths
+for k, v in res_path.iteritems():
+	res_path[k] = os.path.join(root_path, v)
+	print "Resource", k, "path:", res_path[k]
+
 window = None
 clock = None
 imgH = None
 objH = None
 keyH = None
 rmH = None
+lvlH = None
 space = None
 sndH = None
+levels = None
 
 #keybindings
 leftButton = None

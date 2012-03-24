@@ -26,7 +26,8 @@ import time
 import handle.img
 import handle.obj
 import handle.key
-import handle.room
+#import handle.room
+import handle.level
 import handle.snd
 import cfg
 from math import pi
@@ -55,7 +56,7 @@ def __init():
 	os.environ['SDL_VIDEO_CENTERED'] = '1'					#Center Window
 	
 	#PYMUNK INIT
-	pymunk.init_pymunk()
+	#pymunk.init()
 	cfg.space = pymunk.Space()
 	cfg.space.gravity = (0, 300)							#default gravity
 	cfg.space.damping = .2
@@ -82,7 +83,10 @@ def __init():
 	cfg.objH = handle.obj.handler()
 	
 	#ROOM HANDLER
-	cfg.rmH = handle.room.handler()
+	#cfg.rmH = handle.room.handler()
+
+	#LEVEL HANDLER
+	cfg.lvlH = handle.level.handler()
 	
 #load
 #	import external resources
@@ -141,9 +145,11 @@ def __load():
 		else:
 			loadingSounds = False
 	#set the options menu key
-	cfg.keyH.assignKeyPress(cfg.menuButton, cfg.rmH.pause)
+	#cfg.keyH.assignKeyPress(cfg.menuButton, cfg.rmH.pause)
+	cfg.keyH.assignKeyPress(cfg.menuButton, cfg.lvlH.pause)
 	#set default room
-	cfg.rmH.mainMenu()
+	#cfg.rmH.mainMenu()
+	cfg.lvlH.start()
 #exit
 #	graceful exit
 ###########################

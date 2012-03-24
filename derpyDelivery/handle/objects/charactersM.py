@@ -338,6 +338,8 @@ class boxBrown(base):
 		self.addRect((0, 0), (124, 132))
 		#movepos
 		self.slewPos = position
+		if derpyRef == None:
+			print "No derpyRef"
 		self.derpyRef = derpyRef
 		#angle lock
 		self.angleLockBody = pymunk.Body(pymunk.inf, pymunk.inf)

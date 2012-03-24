@@ -25,16 +25,19 @@ from objects.base import base
 import json
 import os
 import types
+#import objects
 
 #handles objects
 class handler():
 	
+	objectIDs = {}
+
 	def __init__(self):
 		#load fonts
-		self.veryLargeText = pygame.font.Font(os.path.join(cfg.root_path, "font"), "font.ttf"), 34)
-		self.largeText = pygame.font.Font(os.path.join(cfg.root_path, "font"), "font.ttf"), 22)
-		self.mediumText = pygame.font.Font(os.path.join(cfg.root_path, "font"), "font.ttf"), 14)
-		self.smallText = pygame.font.Font(os.path.join(cfg.root_path, "font"), "font.ttf"), 10)
+		self.veryLargeText = pygame.font.Font(os.path.join(cfg.res_path['font'], "font.ttf"), 34)
+		self.largeText = pygame.font.Font(os.path.join(cfg.res_path['font'], "font.ttf"), 22)
+		self.mediumText = pygame.font.Font(os.path.join(cfg.res_path['font'], "font.ttf"), 14)
+		self.smallText = pygame.font.Font(os.path.join(cfg.res_path['font'], "font.ttf"), 10)
 		#create camera
 		self.cam = camera()
 		#pause
@@ -48,6 +51,19 @@ class handler():
 		#stage scores
 		self.stageScores = {}
 	
+	# def noObj(self,args):
+	# 	print "Object not found"
+	# 	return False
+
+	def clearObjects(self):
+		handler.objectIDs = {}
+	
+	def getObjectByID(self,id):
+		return handler.objectIDs[id]
+
+	def setObjectByID(self,id,obj):
+		handler.objectIDs[id]=obj
+
 	#create new object
 	#	arguments:
 	#		objectType 	- new object class to create
@@ -57,6 +73,23 @@ class handler():
 	def new(self, objectType, *args):
 		newObject = objectType(*args)
 		return newObject
+
+	#creates object using just the name, should be better but it may not even be working
+	def new_nice(self, objectType, pos, args={}):
+		import objects
+		try:
+			#return getattr(objects,objectType,self.noObj)(args)
+			func = objects.__dict__[objectType]
+			#return func(pos,args)
+
+			return apply(func,[pos,args])
+
+			#objects.crate(pos)
+
+			#return objects.__dict__[objectType](pos,args)
+
+		except Exception, init:
+			print "Object",objectType,"Error:",init
 	
 	def saveSettings(self):
 		controls = {
@@ -96,14 +129,14 @@ class handler():
 			cfg.keyH.keyPress = {}
 			
 			for e in self.keyReleasedPrePause:
-				if self.keyReleasedPrePause[e] == cfg.rmH.pause:
-					cfg.keyH.assignKeyRelease(e, cfg.rmH.pause)
+				if self.keyReleasedPrePause[e] == cfg.lvlH.pause:
+					cfg.keyH.assignKeyRelease(e, cfg.lvlH.pause)
 			for e in self.keyDownPrePause:
-				if self.keyDownPrePause[e] == cfg.rmH.pause:
-					cfg.keyH.assignKeyDown(e, cfg.rmH.pause)
+				if self.keyDownPrePause[e] == cfg.lvlH.pause:
+					cfg.keyH.assignKeyDown(e, cfg.lvlH.pause)
 			for e in self.keyPressPrePause:
-				if self.keyPressPrePause[e] == cfg.rmH.pause:
-					cfg.keyH.assignKeyPress(e, cfg.rmH.pause)
+				if self.keyPressPrePause[e] == cfg.lvlH.pause:
+					cfg.keyH.assignKeyPress(e, cfg.lvlH.pause)
 		else:
 			#re-assign keys to pre-pause mode
 			cfg.keyH.keyRelease = self.keyReleasedPrePause
@@ -130,9 +163,9 @@ class handler():
 		#move camera
 		self.cam.follow()
 		#draw background, repeat it if necessary
-		if cfg.rmH.bgImage is not None:
-			if isinstance(cfg.rmH.bgImage, types.ListType):
-				for imgDef in cfg.rmH.bgImage:
+		if cfg.lvlH.bgImage is not None:
+			if isinstance(cfg.lvlH.bgImage, types.ListType):
+				for imgDef in cfg.lvlH.bgImage:
 					img = imgDef[0]
 					ioW = imgDef[1]
 					ioH = imgDef[2]
@@ -141,7 +174,7 @@ class handler():
 						cfg.window.blit(img, position)
 			else:
 				position = (-self.cam.position[0], -self.cam.position[1])
-				cfg.window.blit(cfg.rmH.bgImage, position)
+				cfg.window.blit(cfg.lvlH.bgImage, position)
 		else:
 			pass
 			cfg.window.fill((86,189,227))	#fill window
@@ -250,11 +283,11 @@ class camera():
 				#stay within room bounds
 				if self.position[0] < 0:
 					self.position = (0, self.position[1])
-				elif self.position[0]+self.__view[0] > cfg.rmH.dimensions[0]:
-					self.position = (cfg.rmH.dimensions[0]-self.__view[0], self.position[1])
+				elif self.position[0]+self.__view[0] > cfg.lvlH.dimensions[0]:
+					self.position = (cfg.lvlH.dimensions[0]-self.__view[0], self.position[1])
 				if self.position[1] < 1:
 					self.position = (self.position[0], 0)
-				elif self.position[1]+self.__view[1] > cfg.rmH.dimensions[1]:
-					self.position = (self.position[0], cfg.rmH.dimensions[1]-self.__view[1])
+				elif self.position[1]+self.__view[1] > cfg.lvlH.dimensions[1]:
+					self.position = (self.position[0], cfg.lvlH.dimensions[1]-self.__view[1])
 			else:
 				self.position = (0, 0)

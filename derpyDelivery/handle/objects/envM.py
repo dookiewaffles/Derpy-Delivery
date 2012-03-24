@@ -99,7 +99,7 @@ class balloon(base):
 #mail
 class mail(base):
 	
-	def __init__(self, position):
+	def __init__(self, position,args):
 		#base init
 		base.__init__(self, position, "env_mail", True, False)
 		self.body.mass = 1

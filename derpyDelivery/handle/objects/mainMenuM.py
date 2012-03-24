@@ -47,19 +47,20 @@ class mainMenuController(base):
 		cfg.keyH.assignKeyDown(pygame.K_SPACE, None)
 		
 	def startGame(self):
-		cfg.rmH.clearRoom()
-		cfg.rmH.introCutscene()
+		cfg.lvlH.clearRoom()
+		#cfg.rmH.introCutscene()
+		cfg.lvlH.loadLevel("stage001") #This MUST be changed to load the next level externally
 		
 	def skip(self):
 		cfg.objH.stageScores["1"] = [("TIME", "0"), ("TOTAL", "0")]
-		cfg.rmH.clearRoom()
-		cfg.rmH.stageTwoCutscene()
+		cfg.lvlH.clearRoom()
+		#cfg.lvlH.stageTwoCutscene()
 		
 class endStage(base):
-	def __init__(self, number, bonuses, targetRoom):
+	def __init__(self, number, bonuses, targetLevel):
 		#base init
 		base.__init__(self, (0, 0), None)
-		cfg.keyH.assignKeyPress(cfg.startButton, self.nextRoom)
+		cfg.keyH.assignKeyPress(cfg.startButton, self.nextLevel)
 		self.contText = cfg.objH.largeText.render('<Press '+cfg.keyH.keyCodeToString(cfg.startButton).upper()+' To Continue>', 0, (255, 255, 255))
 		self.stageNumber = cfg.objH.veryLargeText.render('Stage '+number+' Complete!', 0, (255, 255, 255))
 		self.bonuses = []
@@ -72,13 +73,13 @@ class endStage(base):
 			self.bonuses.append((obj, val, 0))
 		self.stageNumberPos = -900
 		self.phase = 0
-		self.targetRoom = targetRoom
+		self.targetLevel = targetLevel
 		cfg.objH.stageScores[number] = bonuses
 	
-	def nextRoom(self):
+	def nextLevel(self):
 		cfg.keyH.assignKeyDown(pygame.K_SPACE, None)
-		cfg.rmH.clearRoom()
-		self.targetRoom()
+		cfg.lvlH.clearRoom()
+		cfg.lvlH.loadLevel(self.targetLevel)
 		
 	def draw(self):
 		if self.phase == 0:
@@ -117,7 +118,7 @@ class endStage(base):
 		
 class startStage(base):
 	
-	def __init__(self, number, name, objective, targetRoom):
+	def __init__(self, number, name, objective, targetLevel):
 		#base init
 		base.__init__(self, (0, 0), None)
 		cfg.keyH.assignKeyPress(cfg.startButton, self.startStage)
@@ -127,7 +128,7 @@ class startStage(base):
 		self.stageObjectives = []
 		for obj in objective:
 			self.stageObjectives.append(cfg.objH.largeText.render('- '+obj+' -', 0, (255, 255, 255)))
-		self.targetRoom = targetRoom
+		self.targetLevel = targetLevel
 		self.stageNumberPos = -900
 		self.stageNamePos = 900
 		self.objectiveAlpha = 0
@@ -135,8 +136,8 @@ class startStage(base):
 		
 	def startStage(self):
 		cfg.keyH.assignKeyDown(pygame.K_SPACE, None)
-		cfg.rmH.clearRoom()
-		self.targetRoom()
+		cfg.lvlH.clearRoom()
+		cfg.lvlH.loadLevel(self.targetLevel)
 		
 	def draw(self):
 		if self.phase == 0:
@@ -169,6 +170,34 @@ class startStage(base):
 			objective.set_alpha(self.objectiveAlpha)
 			cfg.window.blit(objective, (420-(objective.get_width()/2), 300+(i*35)))
 		cfg.window.blit(self.startText, (420-(self.startText.get_width()/2), 500))
+
+class errorScreen(base):
+
+	def __init__(self):
+		#base init
+		base.__init__(self, (0, 0), None)
+		self.depth = -999
+		self.blackSurface = pygame.Surface((840, 525))
+		self.blackSurface = self.blackSurface.convert(cfg.window)
+		self.blackSurface.fill((0,0,255))
+		self.blackSurface.set_alpha(200)
+
+		cfg.window.blit(self.blackSurface,(0,0))
+
+		self.msg = "Error:\n"
+		self.errors = None
+	
+	def refresh(self):
+		if self.errors != None:
+			self.errors.destroy()
+
+		self.errors = cfg.objH.mediumText.render(self.msg,0,(255,255,255))
+		cfg.window.blit(self.errors,(0,0))
+
+	def write(self,msg):
+		self.msg = msg
+		self.refresh()
+		print "Error: "+msg
 		
 class optionsMenu(base):
 
@@ -185,7 +214,8 @@ class optionsMenu(base):
 		self.controlsText = cfg.objH.largeText.render('Controls', 0, (237, 203, 13))
 		self.saveText = cfg.objH.largeText.render('Save Settings', 0, (237, 203, 13))
 		self.restartText = cfg.objH.largeText.render('Restart Level', 0, (237, 203, 13))
-		if cfg.rmH.currentRoom == cfg.rmH.mainMenu:
+		#if cfg.rmH.currentRoom == cfg.rmH.mainMenu:
+		if cfg.lvlH.currentLevel == "mainMenu":
 			self.restartText.set_alpha(50)
 			self.quitText = cfg.objH.largeText.render('Quit Game', 0, (237, 203, 13))
 		else:
@@ -342,12 +372,12 @@ class optionsMenu(base):
 			elif self.menuPos == 3:
 				if cfg.rmH.currentRoom != cfg.rmH.mainMenu:
 					cfg.rmH.pause()
-					cfg.rmH.clearRoom()
+					cfg.lvlH.clearRoom()
 					cfg.rmH.currentRoom()
 			elif self.menuPos == 4:
 				if cfg.rmH.currentRoom != cfg.rmH.mainMenu:
 					cfg.rmH.pause()
-					cfg.rmH.clearRoom()
+					cfg.lvlH.clearRoom()
 					cfg.rmH.mainMenu()
 				else:
 					pygame.event.post(pygame.event.Event(pygame.QUIT))
